@@ -1,0 +1,250 @@
+{
+  "products": [
+    {
+      "id": 1,
+      "name": "Chippy",
+      "category": "Snacks / Junk Foods",
+      "price": 12,
+      "stock": 50
+    },
+    {
+      "id": 2,
+      "name": "Piattos",
+      "category": "Snacks / Junk Foods",
+      "price": 15,
+      "stock": 5
+    },
+    {
+      "id": 3,
+      "name": "Nova",
+      "category": "Snacks / Junk Foods",
+      "price": 10,
+      "stock": 4
+    },
+    {
+      "id": 4,
+      "name": "Lucky Me Pancit Canton",
+      "category": "Instant Foods",
+      "price": 15,
+      "stock": 6
+    },
+    {
+      "id": 5,
+      "name": "Softdrinks (1.5L)",
+      "category": "Beverages",
+      "price": 65,
+      "stock": 3
+    },
+    {
+      "id": 6,
+      "name": "Mantika (sachet)",
+      "category": "Basic Goods / Grocery",
+      "price": 8,
+      "stock": 4
+    },
+    {
+      "id": 7,
+      "name": "Stick-O (small pack)",
+      "category": "Candies / Sweets",
+      "price": 10,
+      "stock": 5
+    },
+    {
+      "id": 8,
+      "name": "Monay",
+      "category": "Bread / Bakery",
+      "price": 8,
+      "stock": 4
+    },
+    {
+      "id": 9,
+      "name": "Cup Noodles",
+      "category": "Instant Foods",
+      "price": 20,
+      "stock": 2
+    },
+    {
+      "id": 10,
+      "name": "Shampoo sachet",
+      "category": "Personal Care",
+      "price": 15,
+      "stock": 43
+    },
+    {
+      "id": 11,
+      "name": "Conditioner sachet",
+      "category": "Personal Care",
+      "price": 20,
+      "stock": 53
+    },
+    {
+      "id": 12,
+      "name": "Soap (Safeguard, Dove)",
+      "category": "Personal Care",
+      "price": 25,
+      "stock": 2
+    },
+    {
+      "id": 13,
+      "name": "Toothpaste",
+      "category": "Personal Care",
+      "price": 21,
+      "stock": 22
+    },
+    {
+      "id": 14,
+      "name": "Toothbrush",
+      "category": "Personal Care",
+      "price": 25,
+      "stock": 53
+    },
+    {
+      "id": 15,
+      "name": "Facial wash",
+      "category": "Personal Care",
+      "price": 50,
+      "stock": 32
+    },
+    {
+      "id": 16,
+      "name": "Lotion",
+      "category": "Personal Care",
+      "price": 90,
+      "stock": 44
+    },
+    {
+      "id": 17,
+      "name": "Deodorant",
+      "category": "Personal Care",
+      "price": 25,
+      "stock": 12
+    },
+    {
+      "id": 18,
+      "name": "Fabric conditioner",
+      "category": "Etc.",
+      "price": 10,
+      "stock": 3
+    },
+    {
+      "id": 19,
+      "name": "Sardines (555)",
+      "category": "Canned Goods",
+      "price": 18,
+      "stock": 30
+    },
+    {
+      "id": 20,
+      "name": "Corned Beef",
+      "category": "Canned Goods",
+      "price": 35,
+      "stock": 20
+    }
+  ],
+  "customers": [
+    {
+      "id": 1,
+      "name": "Mang Rolly",
+      "contact": "",
+      "color": 0,
+      "utangs": [
+        {
+          "id": 1,
+          "items": "2x Lucky Me, 1x Milo",
+          "amount": 220,
+          "date": "2026-04-10",
+          "due": "2026-04-20",
+          "paid": false
+        },
+        {
+          "id": 2,
+          "items": "3x Tide sachet",
+          "amount": 200,
+          "date": "2026-04-14",
+          "due": "2026-04-25",
+          "paid": false
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Ate Lita",
+      "contact": "",
+      "color": 1,
+      "utangs": [
+        {
+          "id": 1,
+          "items": "1x Softdrinks, 2x Milo",
+          "amount": 210,
+          "date": "2026-04-15",
+          "due": "2026-04-28",
+          "paid": false
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Kuya Boy",
+      "contact": "",
+      "color": 2,
+      "utangs": [
+        {
+          "id": 1,
+          "items": "5x Lucky Me",
+          "amount": 310,
+          "date": "2026-04-17",
+          "due": "2026-04-30",
+          "paid": false
+        },
+        {
+          "id": 2,
+          "items": "3x Milo sachet",
+          "amount": 250,
+          "date": "2026-04-18",
+          "due": "2026-04-30",
+          "paid": true
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "name": "kevin",
+      "contact": "09602232830",
+      "color": 3,
+      "utangs": []
+    }
+  ],
+  "orders": [
+    {
+      "id": 1,
+      "customer_name": "kevin",
+      "items": [
+        {
+          "product_id": 1,
+          "name": "Chippy",
+          "price": 12,
+          "qty": 1,
+          "subtotal": 12
+        }
+      ],
+      "total": 12,
+      "note": "",
+      "status": "Cancelled",
+      "created_at": "2026-05-04 13:17:35"
+    }
+  ],
+  "about": {
+    "owner": "Edna B Owner",
+    "contact": "+63 - 904 - 323 - 4567",
+    "facebook_account": "Edna Owner",
+    "facebook_page": "Edna's Sari - Sari Store",
+    "address": "Purok 04 Mapalad, Arayat, Pampanga"
+  },
+  "accounts": {
+    "kevin": {
+      "name": "kevin",
+      "contact": "09602232830",
+      "password": "Soapas"
+    }
+  }
+}

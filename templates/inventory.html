@@ -1,0 +1,179 @@
+{% extends "base.html" %}
+{% set active = "inventory" %}
+{% set is_admin = true %}
+{% block title %}Inventory{% endblock %}
+
+{% block content %}
+<div class="page-title-bar">INVENTORY</div>
+
+<div class="filter-row">
+  <!-- Search -->
+  <form method="get" action="/inventory" style="display:contents;">
+    <input type="hidden" name="status" value="{{ status_filter }}"/>
+    <div class="search-bar" style="max-width:280px; margin-bottom:0;">
+      <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8">
+        <circle cx="6.5" cy="6.5" r="4"/><path d="M11 11l3 3"/>
+      </svg>
+      <input type="text" name="search" placeholder="Search Item" value="{{ search }}"/>
+    </div>
+  </form>
+
+  <!-- Status filters -->
+  {% for s in ['All Status','Normal Stock','Low Stock','No Stock'] %}
+  <a href="/inventory?status={{ s|urlencode }}&search={{ search }}"
+     class="filter-tab {% if status_filter==s %}active{% endif %}">{{ s }}</a>
+  {% endfor %}
+
+  <!-- Add product -->
+  <button class="btn-add-utang" onclick="openModal('modal-add-product')">Add Product</button>
+</div>
+
+<table class="inv-table">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Product Name</th>
+      <th>Category</th>
+      <th>Price</th>
+      <th>Stock</th>
+      <th>Status</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for p in products %}
+    {% set st = stock_status(p.stock) %}
+    <tr>
+      <td>{{ "%02d"|format(p.id) }}</td>
+      <td>{{ p.name }}</td>
+      <td>{{ p.category }}</td>
+      <td>{{ p.price }}</td>
+      <td>{{ p.stock }}</td>
+      <td class="{% if st=='Normal' %}status-normal{% elif st=='Low' %}status-low{% else %}status-none{% endif %}">{{ st }}</td>
+      <td>
+        <button class="btn-edit" data-id="{{ p.id }}" data-name="{{ p.name }}" data-category="{{ p.category }}" data-price="{{ p.price }}" data-stock="{{ p.stock }}" onclick="handleEdit(this)">Edit</button>
+        <button class="btn-delete" data-id="{{ p.id }}" data-name="{{ p.name }}" onclick="handleDelete(this)">Delete</button>
+      </td>
+    </tr>
+    {% else %}
+    <tr><td colspan="7" style="text-align:center; padding:20px; color:#666;">Walang produkto.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<!-- Pagination -->
+{% if total_pages > 1 %}
+<div class="pagination">
+  {% if page > 1 %}<a class="pg-btn" href="/inventory?status={{ status_filter|urlencode }}&search={{ search }}&page={{ page-1 }}">← Previous</a>
+  {% else %}<span class="pg-btn disabled">← Previous</span>{% endif %}
+  {% for p in range(1, total_pages+1) %}
+    {% if p <= 3 or p > total_pages-2 or (p >= page-1 and p <= page+1) %}
+    <a class="pg-btn {% if p==page %}active{% endif %}" href="/inventory?status={{ status_filter|urlencode }}&search={{ search }}&page={{ p }}">{{ p }}</a>
+    {% elif p == 4 and page > 5 %}<span class="pg-btn disabled">…</span>{% endif %}
+  {% endfor %}
+  {% if page < total_pages %}<a class="pg-btn" href="/inventory?status={{ status_filter|urlencode }}&search={{ search }}&page={{ page+1 }}">Next →</a>
+  {% else %}<span class="pg-btn disabled">Next →</span>{% endif %}
+</div>
+{% endif %}
+
+<!-- Add Product Modal -->
+<div class="modal-overlay" id="modal-add-product">
+  <div class="modal">
+    <div class="modal-title">Add Product</div>
+    <div class="field"><label>Product Name</label><input id="np-name" type="text" placeholder="hal. Lucky Me"/></div>
+    <div class="field"><label>Category</label>
+      <select id="np-cat">
+        {% for c in ['Snacks / Junk Foods','Instant Foods','Beverages','Basic Goods / Grocery','Candies / Sweets','Bread / Bakery','Personal Care','Canned Goods','Etc.'] %}
+        <option>{{ c }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="field"><label>Price (₱)</label><input id="np-price" type="number" step="0.01" placeholder="0"/></div>
+    <div class="field"><label>Stock</label><input id="np-stock" type="number" placeholder="0"/></div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal('modal-add-product')">Kanselahin</button>
+      <button class="btn-save" onclick="saveProduct()">I-save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Product Modal -->
+<div class="modal-overlay" id="modal-edit-product">
+  <div class="modal">
+    <div class="modal-title">Edit Product</div>
+    <input type="hidden" id="ep-id"/>
+    <div class="field"><label>Product Name</label><input id="ep-name" type="text"/></div>
+    <div class="field"><label>Category</label>
+      <select id="ep-cat">
+        {% for c in ['Snacks / Junk Foods','Instant Foods','Beverages','Basic Goods / Grocery','Candies / Sweets','Bread / Bakery','Personal Care','Canned Goods','Etc.'] %}
+        <option>{{ c }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="field"><label>Price (₱)</label><input id="ep-price" type="number" step="0.01"/></div>
+    <div class="field"><label>Stock</label><input id="ep-stock" type="number"/></div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal('modal-edit-product')">Kanselahin</button>
+      <button class="btn-save" onclick="updateProduct()">I-update</button>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+async function saveProduct() {
+  const name  = document.getElementById('np-name').value.trim();
+  const category = document.getElementById('np-cat').value;
+  const price = parseFloat(document.getElementById('np-price').value);
+  const stock = parseInt(document.getElementById('np-stock').value);
+  if (!name || isNaN(price) || isNaN(stock)) { toast('Punan ang lahat ng fields.'); return; }
+  try {
+    await api('POST', '/api/products', { name, category, price, stock });
+    toast('Produkto naidagdag!'); closeModal('modal-add-product');
+    setTimeout(() => location.reload(), 600);
+  } catch(e) { toast('May error.'); }
+}
+
+function openEdit(id, name, cat, price, stock) {
+  document.getElementById('ep-id').value    = id;
+  document.getElementById('ep-name').value  = name;
+  document.getElementById('ep-price').value = price;
+  document.getElementById('ep-stock').value = stock;
+  const sel = document.getElementById('ep-cat');
+  for (let o of sel.options) if (o.value === cat) { o.selected = true; break; }
+  openModal('modal-edit-product');
+}
+
+async function updateProduct() {
+  const id    = document.getElementById('ep-id').value;
+  const name  = document.getElementById('ep-name').value.trim();
+  const category = document.getElementById('ep-cat').value;
+  const price = parseFloat(document.getElementById('ep-price').value);
+  const stock = parseInt(document.getElementById('ep-stock').value);
+  if (!name || isNaN(price) || isNaN(stock)) { toast('Punan ang lahat ng fields.'); return; }
+  try {
+    await api('PUT', `/api/products/${id}`, { name, category, price, stock });
+    toast('Produkto na-update!'); closeModal('modal-edit-product');
+    setTimeout(() => location.reload(), 600);
+  } catch(e) { toast('May error.'); }
+}
+
+async function deleteProduct(id, name) {
+  if (!confirm(`Burahin ang "${name}"?`)) return;
+  try {
+    await api('DELETE', `/api/products/${id}`);
+    toast('Produkto nabura.'); setTimeout(() => location.reload(), 600);
+  } catch(e) { toast('May error.'); }
+}
+
+function handleEdit(btn) {
+  openEdit(btn.dataset.id, btn.dataset.name, btn.dataset.category, btn.dataset.price, btn.dataset.stock);
+}
+
+function handleDelete(btn) {
+  deleteProduct(btn.dataset.id, btn.dataset.name);
+}
+</script>
+{% endblock %}

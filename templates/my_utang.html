@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% set active = "my-utang" %}
+{% block title %}My Utang{% endblock %}
+{% block content %}
+
+<div class="page-title-bar">MY UTANG</div>
+
+{% if customer %}
+{% set total_owed = customer.utangs|selectattr('paid','equalto',false)|sum(attribute='amount') %}
+{% if total_owed > 0 %}
+<div style="background:#fff0f0;border:2px solid #ffaaaa;border-radius:6px;padding:14px 20px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;">
+  <div>
+    <div style="font-size:0.8rem;color:#666;">Kabuuang Utang mo</div>
+    <div style="font-family:'Oswald',sans-serif;font-size:1.6rem;font-weight:700;color:#cc2222;">
+      ₱{{ "%.2f"|format(total_owed) }}
+    </div>
+  </div>
+  <div style="font-size:0.82rem;color:#888;">Makipag-ugnayan kay Aling Edna para magbayad.</div>
+</div>
+{% else %}
+<div style="background:#edfaf3;border:2px solid #88ddb0;border-radius:6px;padding:14px 20px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;">
+  <div>
+    <div style="font-size:0.8rem;color:#666;">Kabuuang Utang mo</div>
+    <div style="font-family:'Oswald',sans-serif;font-size:1.6rem;font-weight:700;color:#1a7a3a;">
+      ₱{{ "%.2f"|format(total_owed) }}
+    </div>
+  </div>
+  <div style="font-size:2rem;">✅</div>
+</div>
+{% endif %}
+
+<table class="utang-table">
+  <thead>
+    <tr><th>Date</th><th>Items</th><th>Due Date</th><th>Amount</th><th>Status</th></tr>
+  </thead>
+  <tbody>
+    {% for u in customer.utangs|sort(attribute='paid') %}
+    <tr {% if u.paid %}style="opacity:0.5;"{% endif %}>
+      <td>{{ u.date }}</td>
+      <td {% if u.paid %}style="text-decoration:line-through;"{% endif %}>{{ u.items }}</td>
+      <td>{{ u.due if u.due else '—' }}</td>
+      {% if u.paid %}
+      <td style="font-weight:700;color:#888;">₱{{ "%.2f"|format(u.amount) }}</td>
+      <td><span style="font-weight:700;color:#1a7a3a;">Bayad na ✓</span></td>
+      {% else %}
+      <td style="font-weight:700;color:#cc2222;">₱{{ "%.2f"|format(u.amount) }}</td>
+      <td><span style="font-weight:700;color:#cc2222;">Hindi pa</span></td>
+      {% endif %}
+    </tr>
+    {% else %}
+    <tr><td colspan="5" style="text-align:center;padding:20px;color:#666;">Wala kang utang!</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<div style="text-align:center;padding:50px;color:#888;">
+  <div style="font-size:2rem;margin-bottom:10px;">👤</div>
+  Hindi ka makita sa listahan ng customers.<br/>
+  <span style="font-size:0.85rem;">Makipag-ugnayan kay Aling Edna para mairehistro ka.</span>
+</div>
+{% endif %}
+
+{% endblock %}

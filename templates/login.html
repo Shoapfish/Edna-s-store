@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login — Edna's Store</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"/>
+  <style>
+    body { display:flex; align-items:center; justify-content:center; min-height:100vh; background:#111; }
+    .login-wrap { width:100%; max-width:420px; padding:20px; }
+    .login-card { background:#fff; border-radius:8px; padding:32px 30px; box-shadow:0 8px 40px rgba(0,0,0,0.5); }
+    .store-name { font-family:'Oswald',sans-serif; font-size:1.5rem; font-weight:700; color:var(--orange); text-align:center; }
+    .store-sub  { font-size:0.78rem; color:#888; text-align:center; margin-bottom:22px; }
+    .tabs { display:flex; border:2px solid #ddd; border-radius:6px; overflow:hidden; margin-bottom:20px; }
+    .tab { flex:1; padding:9px; text-align:center; font-size:0.84rem; font-weight:700; cursor:pointer; background:#f5f5f5; color:#888; border:none; font-family:'Open Sans',sans-serif; transition:background 0.15s; }
+    .tab.active { background:var(--cyan); color:#fff; }
+    .section { display:none; }
+    .section.visible { display:block; }
+    .section-title { font-family:'Oswald',sans-serif; font-size:1rem; font-weight:700; color:#111; margin-bottom:16px; text-transform:uppercase; letter-spacing:0.04em; border-bottom:2px solid #eee; padding-bottom:8px; }
+    .error-msg { background:#fff0f0; border:1px solid #ffaaaa; color:#c00; font-size:0.82rem; padding:8px 12px; border-radius:4px; margin-bottom:12px; }
+    .success-msg { background:#edfaf3; border:1px solid #88ddb0; color:#1a7a3a; font-size:0.82rem; padding:8px 12px; border-radius:4px; margin-bottom:12px; }
+    .login-btn { width:100%; padding:10px; background:var(--orange); color:#fff; border:none; border-radius:4px; font-family:'Oswald',sans-serif; font-size:1rem; font-weight:700; cursor:pointer; letter-spacing:0.04em; margin-top:4px; }
+    .login-btn:hover { background:var(--orange-dk); }
+    .reg-btn { width:100%; padding:10px; background:var(--cyan); color:#fff; border:none; border-radius:4px; font-family:'Oswald',sans-serif; font-size:1rem; font-weight:700; cursor:pointer; letter-spacing:0.04em; margin-top:4px; }
+    .reg-btn:hover { background:var(--cyan-dark); }
+    .creds-box { background:#f5f9ff; border:1px solid #b8caf0; border-radius:5px; padding:10px 14px; margin-bottom:14px; font-size:0.8rem; color:#333; }
+    .creds-box strong { color:var(--blue,#1a4fd6); }
+    .divider { text-align:center; color:#bbb; font-size:0.78rem; margin:14px 0; }
+    .link-btn { background:none; border:none; color:var(--cyan); font-size:0.8rem; cursor:pointer; font-family:'Open Sans',sans-serif; text-decoration:underline; display:block; text-align:center; margin-top:10px; }
+  </style>
+</head>
+<body>
+<div class="login-wrap" data-auto-mode="{{ request.form.get('mode', '') }}">
+  <div class="login-card">
+
+    <div class="store-name">EDNA'S SARI-SARI STORE</div>
+    <div class="store-sub">Purok 04 Mapalad, Arayat, Pampanga</div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('admin')">👤 Admin</button>
+      <button class="tab" onclick="switchTab('customer')">🛒 Customer</button>
+    </div>
+
+    {% if error %}<div class="error-msg">❌ {{ error }}</div>{% endif %}
+    {% if success %}<div class="success-msg">✅ {{ success }}</div>{% endif %}
+
+    <!-- ADMIN LOGIN -->
+    <div class="section visible" id="section-admin">
+      <div class="section-title">Admin Login</div>
+
+      <form method="POST" action="/login">
+        <input type="hidden" name="mode" value="admin"/>
+        <div class="field">
+          <label>Username</label>
+          <input type="text" name="username" placeholder="admin" autocomplete="off" value="admin"/>
+        </div>
+        <div class="field">
+          <label>Password</label>
+          <input type="password" name="password" placeholder="••••••••"/>
+        </div>
+        <button type="submit" class="login-btn">LOGIN AS ADMIN</button>
+      </form>
+    </div>
+
+    <!-- CUSTOMER LOGIN / REGISTER -->
+    <div class="section" id="section-customer">
+
+      <!-- Login form -->
+      <div id="cust-login-form">
+        <div class="section-title">Customer Login</div>
+        <form method="POST" action="/login">
+          <input type="hidden" name="mode" value="customer"/>
+          <div class="field">
+            <label>Your Name</label>
+            <input type="text" name="username" placeholder="hal. Mang Rolly" autocomplete="off"/>
+          </div>
+          <div class="field">
+            <label>Password</label>
+            <input type="password" name="password" placeholder="Your password"/>
+          </div>
+          <button type="submit" class="login-btn">LOGIN</button>
+        </form>
+        <div class="divider">— or —</div>
+        <button class="reg-btn" onclick="showRegister()">REGISTER NEW ACCOUNT</button>
+      </div>
+
+      <!-- Register form -->
+      <div id="cust-register-form" style="display:none;">
+        <div class="section-title">Create Customer Account</div>
+        <div class="field">
+          <label>Full Name</label>
+          <input type="text" id="reg-name" placeholder="hal. Mang Rolly" autocomplete="off"/>
+        </div>
+        <div class="field">
+          <label>Contact # (optional)</label>
+          <input type="text" id="reg-contact" placeholder="+63 9XX XXX XXXX"/>
+        </div>
+        <div class="field">
+          <label>Password</label>
+          <input type="password" id="reg-password" placeholder="Create a password"/>
+        </div>
+        <div class="field">
+          <label>Confirm Password</label>
+          <input type="password" id="reg-confirm" placeholder="Re-enter password"/>
+        </div>
+        <button class="reg-btn" onclick="submitRegister()">CREATE ACCOUNT</button>
+        <button class="link-btn" onclick="showLogin()">← Back to login</button>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<script>
+const tabs = document.querySelectorAll('.tab');
+
+function switchTab(mode) {
+  tabs[0].classList.toggle('active', mode === 'admin');
+  tabs[1].classList.toggle('active', mode === 'customer');
+  document.getElementById('section-admin').classList.toggle('visible', mode === 'admin');
+  document.getElementById('section-customer').classList.toggle('visible', mode === 'customer');
+}
+
+function showRegister() {
+  document.getElementById('cust-login-form').style.display = 'none';
+  document.getElementById('cust-register-form').style.display = 'block';
+}
+
+function showLogin() {
+  document.getElementById('cust-register-form').style.display = 'none';
+  document.getElementById('cust-login-form').style.display = 'block';
+}
+
+async function submitRegister() {
+  const name     = document.getElementById('reg-name').value.trim();
+  const contact  = document.getElementById('reg-contact').value.trim();
+  const password = document.getElementById('reg-password').value;
+  const confirm  = document.getElementById('reg-confirm').value;
+
+  if (!name)              { alert('Ilagay ang iyong pangalan.'); return; }
+  if (!password)          { alert('Ilagay ang password.'); return; }
+  if (password !== confirm){ alert('Hindi magkatugma ang password!'); return; }
+
+  try {
+    const res = await fetch('/api/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, contact, password })
+    });
+    const d = await res.json();
+    if (!res.ok) { alert(d.error || 'May error.'); return; }
+    alert(`Account created! Welcome, ${name}! Mag-login na.`);
+    showLogin();
+  } catch(e) { alert('May error sa server.'); }
+}
+
+// Auto-switch to customer tab if previous error was on customer mode
+const autoMode = document.querySelector('.login-wrap').dataset.autoMode;
+if (autoMode === 'customer') {
+  switchTab('customer');
+}
+</script>
+</body>
+</html>

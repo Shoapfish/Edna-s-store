@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% set active = "my-orders" %}
+{% block title %}My Orders{% endblock %}
+{% block content %}
+
+<div class="page-title-bar">MY ORDERS</div>
+
+{% if orders %}
+<table class="inv-table">
+  <thead>
+    <tr><th>#</th><th>Items</th><th>Note</th><th>Total</th><th>Date</th><th>Status</th></tr>
+  </thead>
+  <tbody>
+    {% for o in orders %}
+    <tr>
+      <td>{{ o.id }}</td>
+      <td style="font-size:0.8rem;">
+        {% for item in o.order_items %}
+        <div>{{ item.qty }}× {{ item.name }} — ₱{{ item.subtotal }}</div>
+        {% endfor %}
+      </td>
+      <td style="font-size:0.8rem;color:#666;">{{ o.note if o.note else '—' }}</td>
+      <td style="font-weight:700;color:var(--orange);">₱{{ "%.2f"|format(o.total) }}</td>
+      <td style="font-size:0.75rem;color:#666;">{{ o.created_at }}</td>
+      <td>
+        {% if o.status=='Pending' %}
+        <span style="font-size:0.75rem;font-weight:700;padding:3px 10px;border-radius:99px;background:#fff3cd;color:#856404;">{{ o.status }}</span>
+        {% elif o.status=='Preparing' %}
+        <span style="font-size:0.75rem;font-weight:700;padding:3px 10px;border-radius:99px;background:#cce5ff;color:#004085;">{{ o.status }}</span>
+        {% elif o.status=='Ready' %}
+        <span style="font-size:0.75rem;font-weight:700;padding:3px 10px;border-radius:99px;background:#d4edda;color:#155724;">{{ o.status }} — Pwede na i-pickup!</span>
+        {% elif o.status=='Completed' %}
+        <span style="font-size:0.75rem;font-weight:700;padding:3px 10px;border-radius:99px;background:#e2e3e5;color:#383d41;">{{ o.status }}</span>
+        {% else %}
+        <span style="font-size:0.75rem;font-weight:700;padding:3px 10px;border-radius:99px;background:#f8d7da;color:#721c24;">{{ o.status }}</span>
+        {% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<div style="text-align:center;padding:50px;color:#888;">
+  <div style="font-size:2rem;margin-bottom:10px;">🛒</div>
+  Wala ka pang orders. <a href="/shop" style="color:var(--cyan);font-weight:700;">Mag-order na!</a>
+</div>
+{% endif %}
+
+{% endblock %}

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>{% block title %}Edna's{% endblock %} — Sari-Sari Store</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"/>
+</head>
+<body>
+
+<header class="top-header">
+  <div class="header-left">
+    <div class="header-logo">
+      <div class="header-logo-placeholder">EDNA'S<br>STORE</div>
+    </div>
+    <div class="header-title">EDNA'S SARI - SARI STORE</div>
+  </div>
+  <div style="display:flex;align-items:center;gap:18px;">
+    <div class="header-datetime" id="header-clock"></div>
+    <a href="/logout" style="color:#aaa;font-size:0.78rem;text-decoration:none;border:1px solid #444;padding:5px 12px;border-radius:3px;">Logout</a>
+  </div>
+</header>
+
+<div class="layout">
+  <aside class="sidebar">
+    <span class="sidebar-menu-label">Menu</span>
+    {% if is_admin %}
+      <a href="/"          class="nav-link {% if active=='dashboard' %}active{% endif %}">Dashboard</a>
+      <a href="/products"  class="nav-link {% if active=='products'  %}active{% endif %}">Product List</a>
+      <a href="/utang"     class="nav-link {% if active=='utang'     %}active{% endif %}">Utang List</a>
+      <a href="/inventory" class="nav-link {% if active=='inventory' %}active{% endif %}">Inventory</a>
+      <a href="/orders"    class="nav-link {% if active=='orders'    %}active{% endif %}">
+        Orders
+        <span id="notif-badge" style="display:none;background:#cc2222;color:#fff;border-radius:99px;font-size:0.65rem;padding:1px 7px;margin-left:auto;font-weight:700;"></span>
+      </a>
+      <a href="/about"     class="nav-link {% if active=='about'     %}active{% endif %}">About us</a>
+    {% else %}
+      <a href="/shop"      class="nav-link {% if active=='shop'      %}active{% endif %}">Order</a>
+      <a href="/my-orders" class="nav-link {% if active=='my-orders' %}active{% endif %}">My Orders</a>
+      <a href="/my-utang"  class="nav-link {% if active=='my-utang'  %}active{% endif %}">My Utang</a>
+      <a href="/about"     class="nav-link {% if active=='about'     %}active{% endif %}">About us</a>
+    {% endif %}
+    <div style="margin-top:auto;padding:14px 18px;border-top:1px solid rgba(255,255,255,0.08);">
+      <div style="font-size:0.72rem;color:#aaa;">Logged in as</div>
+      <div style="font-size:0.85rem;color:#fff;font-weight:600;">
+        {{ session.get('username','') }}
+        {% if is_admin %}
+        <span style="font-size:0.65rem;background:var(--orange);color:#111;padding:1px 6px;border-radius:3px;margin-left:4px;">ADMIN</span>
+        {% else %}
+        <span style="font-size:0.65rem;background:var(--cyan);color:#111;padding:1px 6px;border-radius:3px;margin-left:4px;">CUSTOMER</span>
+        {% endif %}
+      </div>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    {% block content %}{% endblock %}
+  </main>
+</div>
+
+<script src="{{ url_for('static', filename='js/utils.js') }}"></script>
+{% if is_admin %}
+<script>
+// Poll for pending orders every 15s
+async function checkNotif() {
+  try {
+    const r = await fetch('/api/orders/pending-count');
+    const d = await r.json();
+    const badge = document.getElementById('notif-badge');
+    if (badge) {
+      if (d.count > 0) { badge.textContent = d.count; badge.style.display = 'inline'; }
+      else badge.style.display = 'none';
+    }
+  } catch(e) {}
+}
+checkNotif(); setInterval(checkNotif, 15000);
+</script>
+{% endif %}
+{% block scripts %}{% endblock %}
+</body>
+</html>

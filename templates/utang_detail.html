@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+{% set active = "utang" %}
+{% set is_admin = true %}
+{% block title %}{{ customer.name }}{% endblock %}
+
+{% block content %}
+<a href="/utang" class="back-link">← Bumalik sa Utang List</a>
+
+{% set total_owed = customer.utangs|selectattr('paid','equalto',false)|sum(attribute='amount') %}
+
+<div class="customer-header">
+  <div class="customer-avatar av{{ customer.color % 5 }}">
+    {{ customer.name.split()|map('first')|join('')|upper|truncate(2, true, '') }}
+  </div>
+  <div>
+    <div style="font-family:'Oswald',sans-serif; font-size:1.3rem; font-weight:700;">{{ customer.name }}</div>
+    <div style="font-size:0.82rem; color:#555;">{{ customer.utangs|selectattr('paid','equalto',false)|list|length }} unpaid records</div>
+  </div>
+  <div class="customer-total">₱{{ "{:,.2f}".format(total_owed) }}</div>
+  <button class="btn-primary" style="margin-left:12px;" onclick="openModal('modal-add-utang')">+ Magdagdag ng Utang</button>
+</div>
+
+<table class="utang-table">
+  <thead>
+    <tr>
+      <th>Date</th>
+      <th>Items</th>
+      <th>Due Date</th>
+      <th>Amount</th>
+      <th>Status</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for u in customer.utangs|sort(attribute='paid') %}
+    <tr {% if u.paid %}style="opacity:0.5;"{% endif %}>
+      <td>{{ u.date }}</td>
+      <td {% if u.paid %}style="text-decoration:line-through;"{% endif %}>{{ u.items }}</td>
+      <td>{{ u.due if u.due else '—' }}</td>
+      <td style="color:#cc2222; font-weight:700;">₱{{ "{:,.2f}".format(u.amount) }}</td>
+      <td>
+        {% if u.paid %}
+          <span style="color:#1a7a3a; font-weight:600;">Bayad</span>
+        {% else %}
+          <span style="color:#cc2222; font-weight:600;">Hindi pa</span>
+        {% endif %}
+      </td>
+      <td>
+        {% if not u.paid %}
+        <button class="btn-edit" data-utang-id="{{ u.id }}" onclick="handleMarkPaid(this)">Bayad</button>
+        {% endif %}
+        <button class="btn-delete" data-utang-id="{{ u.id }}" onclick="handleDeleteUtang(this)">Burahin</button>
+      </td>
+    </tr>
+    {% else %}
+    <tr><td colspan="6" style="text-align:center; padding:20px; color:#666;">Wala pang rekord.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<!-- Add Utang Modal -->
+<div class="modal-overlay" id="modal-add-utang">
+  <div class="modal">
+    <div class="modal-title">Magdagdag ng Utang</div>
+    <div class="field"><label>Mga Item</label><input id="nu-items" type="text" placeholder="hal. 2x Milo, 1x Lucky Me"/></div>
+    <div class="field"><label>Halaga (₱)</label><input id="nu-amount" type="number" step="0.01" placeholder="0.00"/></div>
+    <div class="field"><label>Petsa ng Utang</label><input id="nu-date" type="date"/></div>
+    <div class="field"><label>Due Date</label><input id="nu-due" type="date"/></div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal('modal-add-utang')">Kanselahin</button>
+      <button class="btn-save" onclick="saveUtang()">I-save</button>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script data-customer-id="{{ customer.id }}">
+const CID = document.currentScript.dataset.customerId;
+document.getElementById('nu-date').value = todayStr();
+
+function handleMarkPaid(btn) {
+  markPaid(btn.dataset.utangId);
+}
+
+function handleDeleteUtang(btn) {
+  deleteUtang(btn.dataset.utangId);
+}
+
+async function markPaid(uid) {
+  try {
+    await api('PATCH', `/api/customers/${CID}/utangs/${uid}/pay`);
+    toast('Naitala ang bayad!'); setTimeout(() => location.reload(), 600);
+  } catch(e) { toast('May error.'); }
+}
+
+async function deleteUtang(uid) {
+  if (!confirm('Burahin ang rekord na ito?')) return;
+  try {
+    await api('DELETE', `/api/customers/${CID}/utangs/${uid}`);
+    toast('Rekord nabura.'); setTimeout(() => location.reload(), 600);
+  } catch(e) { toast('May error.'); }
+}
+
+async function saveUtang() {
+  const items  = document.getElementById('nu-items').value.trim();
+  const amount = parseFloat(document.getElementById('nu-amount').value);
+  const date   = document.getElementById('nu-date').value;
+  const due    = document.getElementById('nu-due').value;
+  if (!items || !amount || !date) { toast('Punan ang lahat ng fields.'); return; }
+  try {
+    await api('POST', `/api/customers/${CID}/utangs`, { items, amount, date, due });
+    toast('Utang naitala!');
+    closeModal('modal-add-utang');
+    setTimeout(() => location.reload(), 600);
+  } catch(e) { toast('May error.'); }
+}
+</script>
+{% endblock %}

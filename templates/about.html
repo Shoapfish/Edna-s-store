@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% set active = "about" %}
+{% set is_admin = true %}
+{% block title %}About Us{% endblock %}
+
+{% block content %}
+<div class="page-title-bar">ABOUT US</div>
+
+<div class="about-wrap">
+  <div class="about-logo">
+    <div class="about-logo-placeholder">EDNA'S<br>SARI-SARI<br>STORE</div>
+  </div>
+  <div class="about-name">
+    <div class="line1">EDNA'S</div>
+    <div class="line2">SARI - SARI STORE</div>
+  </div>
+</div>
+
+<div class="about-info">
+  <div class="about-row">
+    <span class="a-label">Owner</span>
+    <span class="a-val">{{ about.owner }}</span>
+  </div>
+  <div class="about-row">
+    <span class="a-label">Contact #</span>
+    <span class="a-val">{{ about.contact }}</span>
+  </div>
+  <div class="about-row">
+    <span class="a-label">Facebook Account</span>
+    <span class="a-val">{{ about.facebook_account }}</span>
+  </div>
+  <div class="about-row">
+    <span class="a-label">Facebook Page</span>
+    <span class="a-val">{{ about.facebook_page }}</span>
+  </div>
+  <div class="about-row">
+    <span class="a-label">Address</span>
+    <span class="a-val">{{ about.address }}</span>
+  </div>
+</div>
+
+{% endblock %}

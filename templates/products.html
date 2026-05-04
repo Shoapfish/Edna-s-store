@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% set active = "products" %}
+{% set is_admin = true %}
+{% block title %}Product List{% endblock %}
+
+{% block content %}
+<div class="page-title-bar">PRODUCT LIST</div>
+
+<!-- Category tabs -->
+<div class="cat-tabs">
+  <a href="/products?category=All+Products&search={{ search }}"
+     class="cat-tab {% if current_cat=='All Products' %}active{% endif %}">All Products</a>
+  {% for cat in categories %}
+  <a href="/products?category={{ cat|urlencode }}&search={{ search }}"
+     class="cat-tab {% if current_cat==cat %}active{% endif %}">{{ cat }}</a>
+  {% endfor %}
+</div>
+
+<!-- Search -->
+<form method="get" action="/products" style="margin-bottom:16px;">
+  <input type="hidden" name="category" value="{{ current_cat }}"/>
+  <div class="search-bar" style="max-width:340px;">
+    <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8">
+      <circle cx="6.5" cy="6.5" r="4"/><path d="M11 11l3 3"/>
+    </svg>
+    <input type="text" name="search" placeholder="Search Item" value="{{ search }}"/>
+  </div>
+</form>
+
+<!-- Product grid -->
+{% if products %}
+<div class="product-grid">
+  {% for p in products %}
+  <div class="product-card">
+    <p>Product Name: <strong>{{ p.name }}</strong></p>
+    <p>Category: <strong>{{ p.category }}</strong></p>
+    <p>Price: <strong>₱{{ p.price }}</strong> &nbsp;&nbsp; Stock: <strong>{{ p.stock }}</strong></p>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div style="padding:30px; text-align:center; color:#666;">No products found.</div>
+{% endif %}
+
+<!-- Pagination -->
+{% if total_pages > 1 %}
+<div class="pagination">
+  {% if page > 1 %}
+  <a class="pg-btn" href="/products?category={{ current_cat|urlencode }}&search={{ search }}&page={{ page-1 }}">← Previous</a>
+  {% else %}
+  <span class="pg-btn disabled">← Previous</span>
+  {% endif %}
+
+  {% for p in range(1, total_pages+1) %}
+    {% if p <= 3 or p > total_pages-2 or (p >= page-1 and p <= page+1) %}
+    <a class="pg-btn {% if p==page %}active{% endif %}"
+       href="/products?category={{ current_cat|urlencode }}&search={{ search }}&page={{ p }}">{{ p }}</a>
+    {% elif p == 4 and page > 5 %}
+    <span class="pg-btn disabled">…</span>
+    {% endif %}
+  {% endfor %}
+
+  {% if page < total_pages %}
+  <a class="pg-btn" href="/products?category={{ current_cat|urlencode }}&search={{ search }}&page={{ page+1 }}">Next →</a>
+  {% else %}
+  <span class="pg-btn disabled">Next →</span>
+  {% endif %}
+</div>
+{% endif %}
+
+{% endblock %}

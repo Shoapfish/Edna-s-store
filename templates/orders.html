@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+{% set active = "orders" %}
+{% block title %}Orders{% endblock %}
+{% block content %}
+
+<div class="page-title-bar">ORDERS — Pre-order Notifications</div>
+
+{% set pending = orders|selectattr('status','equalto','Pending')|list %}
+{% if pending %}
+<div style="background:#fff8ec;border:2px solid var(--orange);border-radius:6px;padding:12px 18px;margin-bottom:18px;display:flex;align-items:center;gap:10px;">
+  <span style="font-size:1.3rem;">🔔</span>
+  <span style="font-family:'Oswald',sans-serif;font-size:1rem;font-weight:700;color:var(--orange-dk);">
+    {{ pending|length }} BAGONG ORDER{{ 'S' if pending|length > 1 else '' }} — Kailangan ng aksyon!
+  </span>
+</div>
+{% endif %}
+
+<!-- Filter tabs -->
+<div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
+  {% for s in ['All','Pending','Preparing','Ready','Completed','Cancelled'] %}
+  {% if s=='All' %}
+  <button onclick="filterOrders('{{ s }}')" class="filter-tab" id="ftab-{{ s }}" style="background:var(--cyan);color:#fff;border-color:var(--cyan);">{{ s }}</button>
+  {% else %}
+  <button onclick="filterOrders('{{ s }}')" class="filter-tab" id="ftab-{{ s }}">{{ s }}</button>
+  {% endif %}
+  {% endfor %}
+</div>
+
+<table class="inv-table" id="orders-table">
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>Customer</th>
+      <th>Items</th>
+      <th>Note</th>
+      <th>Total</th>
+      <th>Time</th>
+      <th>Status</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for o in orders %}
+    <tr data-status="{{ o.status }}" id="order-row-{{ o.id }}">
+      <td>{{ o.id }}</td>
+      <td style="font-weight:700;">{{ o.customer_name }}</td>
+      <td style="font-size:0.8rem;">
+        {% for item in o.order_items %}
+        <div>{{ item.qty }}× {{ item.name }} — ₱{{ item.subtotal }}</div>
+        {% endfor %}
+      </td>
+      <td style="font-size:0.8rem;color:#666;max-width:140px;">{{ o.note if o.note else '—' }}</td>
+      <td style="font-weight:700;color:var(--orange);">₱{{ "%.2f"|format(o.total) }}</td>
+      <td style="font-size:0.75rem;color:#666;">{{ o.created_at }}</td>
+      <td>
+        {% if o.status=='Pending' %}
+        <span class="status-badge" id="status-{{ o.id }}" style="font-size:0.75rem;font-weight:700;padding:3px 10px;border-radius:99px;background:#fff3cd;color:#856404;">{{ o.status }}</span>
+        {% elif o.status=='Preparing' %}
+        <span class="status-badge" id="status-{{ o.id }}" style="font-size:0.75rem;font-weight:700;padding:3px 10px;border-radius:99px;background:#cce5ff;color:#004085;">{{ o.status }}</span>
+        {% elif o.status=='Ready' %}
+        <span class="status-badge" id="status-{{ o.id }}" style="font-size:0.75rem;font-weight:700;padding:3px 10px;border-radius:99px;background:#d4edda;color:#155724;">{{ o.status }}</span>
+        {% elif o.status=='Completed' %}
+        <span class="status-badge" id="status-{{ o.id }}" style="font-size:0.75rem;font-weight:700;padding:3px 10px;border-radius:99px;background:#e2e3e5;color:#383d41;">{{ o.status }}</span>
+        {% else %}
+        <span class="status-badge" id="status-{{ o.id }}" style="font-size:0.75rem;font-weight:700;padding:3px 10px;border-radius:99px;background:#f8d7da;color:#721c24;">{{ o.status }}</span>
+        {% endif %}
+      </td>
+      <td>
+        <div style="display:flex;flex-direction:column;gap:3px;">
+          {% if o.status == 'Pending' %}
+          <button class="btn-edit" data-order-id="{{ o.id }}" data-new-status="Preparing" onclick="handleStatusChange(this)">Preparing</button>
+          {% elif o.status == 'Preparing' %}
+          <button class="btn-edit" data-order-id="{{ o.id }}" data-new-status="Ready" onclick="handleStatusChange(this)">Ready</button>
+          {% elif o.status == 'Ready' %}
+          <button class="btn-edit" style="background:#1a7a3a;" data-order-id="{{ o.id }}" data-new-status="Completed" onclick="handleStatusChange(this)">Complete</button>
+          {% endif %}
+          {% if o.status not in ['Completed','Cancelled'] %}
+          <button class="btn-delete" data-order-id="{{ o.id }}" data-new-status="Cancelled" onclick="handleStatusChange(this)">Cancel</button>
+          {% endif %}
+        </div>
+      </td>
+    </tr>
+    {% else %}
+    <tr><td colspan="8" style="text-align:center;padding:30px;color:#666;">Wala pang orders.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{% endblock %}
+{% block scripts %}
+<script>
+function filterOrders(status) {
+  document.querySelectorAll('.filter-tab').forEach(t => { t.style.background=''; t.style.color=''; t.style.borderColor=''; });
+  const active = document.getElementById('ftab-' + status);
+  if (active) { active.style.background='var(--cyan)'; active.style.color='#fff'; active.style.borderColor='var(--cyan)'; }
+  document.querySelectorAll('#orders-table tbody tr[data-status]').forEach(row => {
+    row.style.display = (status === 'All' || row.dataset.status === status) ? '' : 'none';
+  });
+}
+
+const STATUS_COLORS = {
+  Pending:   'background:#fff3cd;color:#856404;',
+  Preparing: 'background:#cce5ff;color:#004085;',
+  Ready:     'background:#d4edda;color:#155724;',
+  Completed: 'background:#e2e3e5;color:#383d41;',
+  Cancelled: 'background:#f8d7da;color:#721c24;'
+};
+
+async function updateStatus(id, status) {
+  try {
+    await api('PATCH', `/api/orders/${id}/status`, { status });
+    toast(`Order #${id} → ${status}`);
+    setTimeout(() => location.reload(), 700);
+  } catch(e) { toast('May error.'); }
+}
+
+function handleStatusChange(btn) {
+  const orderId = btn.dataset.orderId;
+  const newStatus = btn.dataset.newStatus;
+  updateStatus(orderId, newStatus);
+}
+</script>
+{% endblock %}

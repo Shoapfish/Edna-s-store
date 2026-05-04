@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% set active = "dashboard" %}
+{% set is_admin = true %}
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="page-title-bar">DASHBOARD</div>
+{% if new_orders %}
+<div style="background:#fff8ec;border:2px solid var(--orange);border-radius:6px;padding:11px 18px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;">
+  <span style="font-family:'Oswald',sans-serif;font-size:0.95rem;font-weight:700;color:var(--orange-dk);">
+    🔔 {{ new_orders|length }} bagong order{{ 's' if new_orders|length > 1 else '' }} na naghihintay!
+  </span>
+  <a href="/orders" class="btn-edit" style="text-decoration:none;">View Orders</a>
+</div>
+{% endif %}
+
+
+<!-- Metrics Row -->
+<div class="metrics-row">
+  <div class="metric-card">
+    <div class="m-label">Total Products</div>
+    <div class="m-value">{{ "{:,}".format(total_products) }}</div>
+  </div>
+  <div class="metric-card">
+    <div class="m-label">Total Stocks</div>
+    <div class="m-value">{{ "{:,}".format(total_stocks) }}</div>
+  </div>
+  <div class="metric-card">
+    <div class="m-label">Low Stocks Items</div>
+    <div class="m-value">{{ low_items|length }}</div>
+  </div>
+  <div class="metric-card">
+    <div class="m-label">Out of Stock</div>
+    <div class="m-value">{{ out_of_stock|length }}</div>
+  </div>
+  <div class="metric-card">
+    <div class="m-label">Total Categories</div>
+    <div class="m-value">{{ categories|length }}</div>
+  </div>
+</div>
+
+<!-- 3-column panels -->
+<div class="dash-grid">
+
+  <!-- Category Distribution -->
+  <div class="dash-panel">
+    <div class="dash-panel-title">Category Distribution</div>
+    {% set total = total_products if total_products > 0 else 1 %}
+    {% for cat in categories %}
+    <div class="dash-cat-row">
+      <span>{{ cat }}</span>
+      <span>{{ "%.2f"|format((cat_counts.get(cat, 0) / total * 100)) }}%</span>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Low Stock Items -->
+  <div class="dash-panel">
+    <div class="dash-panel-header">
+      <div class="dash-panel-title" style="margin-bottom:0">List of Low Stock Items</div>
+      <a href="/inventory?status=Low+Stock" class="view-all-btn">View All</a>
+    </div>
+    <div style="display:flex; justify-content:space-between; font-weight:700; font-size:0.8rem; margin-bottom:6px; text-decoration:underline;">
+      <span>Product Name</span><span>Stock</span>
+    </div>
+    {% for p in low_items[:8] %}
+    <div class="dash-low-item">
+      <span>{{ p.name }}</span><span>{{ p.stock }}</span>
+    </div>
+    {% else %}
+    <div style="font-size:0.82rem; color:#666;">No low stock items.</div>
+    {% endfor %}
+  </div>
+
+  <!-- Out of Stock -->
+  <div class="dash-panel">
+    <div class="dash-panel-header">
+      <div class="dash-panel-title" style="margin-bottom:0">List of Out of Stock Items</div>
+      <a href="/inventory?status=No+Stock" class="view-all-btn">View All</a>
+    </div>
+    {% for p in out_of_stock[:10] %}
+    <div class="out-stock-item">{{ p.name }}</div>
+    {% else %}
+    <div style="font-size:0.82rem; color:#666;">No out of stock items.</div>
+    {% endfor %}
+  </div>
+
+</div>
+
+<!-- Utang Summary -->
+<div class="utang-summary">
+  <p>Total Utang: <span style="color:#cc2222;">₱{{ "{:,.2f}".format(total_utang) }}</span></p>
+  <p>Total May Utang: {{ total_may_utang }}</p>
+  <p>Top Debtor: {% if top_debtor %}{{ top_debtor.name }}{% else %}—{% endif %}</p>
+</div>
+
+{% endblock %}
