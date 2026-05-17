@@ -7,27 +7,19 @@
 
 {% if customer %}
 {% set total_owed = customer.utangs|selectattr('paid','equalto',false)|sum(attribute='amount') %}
-{% if total_owed > 0 %}
-<div style="background:#fff0f0;border:2px solid #ffaaaa;border-radius:6px;padding:14px 20px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;">
+<div style="background:{% if total_owed > 0 %}#fff0f0{% else %}#edfaf3{% endif %};border:2px solid {% if total_owed > 0 %}#ffaaaa{% else %}#88ddb0{% endif %};border-radius:6px;padding:14px 20px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;">
   <div>
     <div style="font-size:0.8rem;color:#666;">Kabuuang Utang mo</div>
-    <div style="font-family:'Oswald',sans-serif;font-size:1.6rem;font-weight:700;color:#cc2222;">
+    <div style="font-family:'Oswald',sans-serif;font-size:1.6rem;font-weight:700;color:{% if total_owed > 0 %}#cc2222{% else %}#1a7a3a{% endif %};">
       ₱{{ "%.2f"|format(total_owed) }}
     </div>
   </div>
-  <div style="font-size:0.82rem;color:#888;">Makipag-ugnayan kay Aling Edna para magbayad.</div>
-</div>
-{% else %}
-<div style="background:#edfaf3;border:2px solid #88ddb0;border-radius:6px;padding:14px 20px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;">
-  <div>
-    <div style="font-size:0.8rem;color:#666;">Kabuuang Utang mo</div>
-    <div style="font-family:'Oswald',sans-serif;font-size:1.6rem;font-weight:700;color:#1a7a3a;">
-      ₱{{ "%.2f"|format(total_owed) }}
-    </div>
-  </div>
+  {% if total_owed == 0 %}
   <div style="font-size:2rem;">✅</div>
+  {% else %}
+  <div style="font-size:0.82rem;color:#888;">Makipag-ugnayan kay Aling Edna para magbayad.</div>
+  {% endif %}
 </div>
-{% endif %}
 
 <table class="utang-table">
   <thead>
@@ -37,15 +29,10 @@
     {% for u in customer.utangs|sort(attribute='paid') %}
     <tr {% if u.paid %}style="opacity:0.5;"{% endif %}>
       <td>{{ u.date }}</td>
-      <td {% if u.paid %}style="text-decoration:line-through;"{% endif %}>{{ u.items }}</td>
+      <td {% if u.paid %}style="text-decoration:line-through;"{% endif %}>{{ u['items'] }}</td>
       <td>{{ u.due if u.due else '—' }}</td>
-      {% if u.paid %}
-      <td style="font-weight:700;color:#888;">₱{{ "%.2f"|format(u.amount) }}</td>
-      <td><span style="font-weight:700;color:#1a7a3a;">Bayad na ✓</span></td>
-      {% else %}
-      <td style="font-weight:700;color:#cc2222;">₱{{ "%.2f"|format(u.amount) }}</td>
-      <td><span style="font-weight:700;color:#cc2222;">Hindi pa</span></td>
-      {% endif %}
+      <td style="font-weight:700;color:{% if u.paid %}#888{% else %}#cc2222{% endif %};">₱{{ "%.2f"|format(u.amount) }}</td>
+      <td><span style="font-weight:700;color:{% if u.paid %}#1a7a3a{% else %}#cc2222{% endif %};">{% if u.paid %}Bayad na ✓{% else %}Hindi pa{% endif %}</span></td>
     </tr>
     {% else %}
     <tr><td colspan="5" style="text-align:center;padding:20px;color:#666;">Wala kang utang!</td></tr>

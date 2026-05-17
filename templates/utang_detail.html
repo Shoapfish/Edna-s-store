@@ -35,7 +35,7 @@
     {% for u in customer.utangs|sort(attribute='paid') %}
     <tr {% if u.paid %}style="opacity:0.5;"{% endif %}>
       <td>{{ u.date }}</td>
-      <td {% if u.paid %}style="text-decoration:line-through;"{% endif %}>{{ u.items }}</td>
+      <td {% if u.paid %}style="text-decoration:line-through;"{% endif %}>{{ u['items'] }}</td>
       <td>{{ u.due if u.due else '—' }}</td>
       <td style="color:#cc2222; font-weight:700;">₱{{ "{:,.2f}".format(u.amount) }}</td>
       <td>
@@ -47,9 +47,9 @@
       </td>
       <td>
         {% if not u.paid %}
-        <button class="btn-edit" data-utang-id="{{ u.id }}" onclick="handleMarkPaid(this)">Bayad</button>
+        <button class="btn-edit" onclick="markPaid({{ u.id }})">Bayad</button>
         {% endif %}
-        <button class="btn-delete" data-utang-id="{{ u.id }}" onclick="handleDeleteUtang(this)">Burahin</button>
+        <button class="btn-delete" onclick="deleteUtang({{ u.id }})">Burahin</button>
       </td>
     </tr>
     {% else %}
@@ -63,7 +63,7 @@
   <div class="modal">
     <div class="modal-title">Magdagdag ng Utang</div>
     <div class="field"><label>Mga Item</label><input id="nu-items" type="text" placeholder="hal. 2x Milo, 1x Lucky Me"/></div>
-    <div class="field"><label>Halaga (₱)</label><input id="nu-amount" type="number" step="0.01" placeholder="0.00"/></div>
+    <div class="field"><label>Halaga (₱)</label><input id="nu-amount" type="text" inputmode="decimal" placeholder="0.00" oninput="this.value=this.value.replace(/[^0-9.]/g,'').replace(/(\..*)\./g,'$1')"/><div class="field-hint">📌 Numbers only (e.g. 50 or 49.50)</div></div>
     <div class="field"><label>Petsa ng Utang</label><input id="nu-date" type="date"/></div>
     <div class="field"><label>Due Date</label><input id="nu-due" type="date"/></div>
     <div class="modal-actions">
@@ -76,17 +76,9 @@
 {% endblock %}
 
 {% block scripts %}
-<script data-customer-id="{{ customer.id }}">
-const CID = document.currentScript.dataset.customerId;
+<script>
+const CID = {{ customer.id }};
 document.getElementById('nu-date').value = todayStr();
-
-function handleMarkPaid(btn) {
-  markPaid(btn.dataset.utangId);
-}
-
-function handleDeleteUtang(btn) {
-  deleteUtang(btn.dataset.utangId);
-}
 
 async function markPaid(uid) {
   try {

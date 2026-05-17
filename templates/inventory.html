@@ -51,8 +51,8 @@
       <td>{{ p.stock }}</td>
       <td class="{% if st=='Normal' %}status-normal{% elif st=='Low' %}status-low{% else %}status-none{% endif %}">{{ st }}</td>
       <td>
-        <button class="btn-edit" data-id="{{ p.id }}" data-name="{{ p.name }}" data-category="{{ p.category }}" data-price="{{ p.price }}" data-stock="{{ p.stock }}" onclick="handleEdit(this)">Edit</button>
-        <button class="btn-delete" data-id="{{ p.id }}" data-name="{{ p.name }}" onclick="handleDelete(this)">Delete</button>
+        <button class="btn-edit" onclick="openEdit({{ p.id }}, '{{ p.name|replace("'","\\'") }}', '{{ p.category }}', {{ p.price }}, {{ p.stock }})">Edit</button>
+        <button class="btn-delete" onclick="deleteProduct({{ p.id }}, '{{ p.name|replace("'","\\'") }}')">Delete</button>
       </td>
     </tr>
     {% else %}
@@ -88,8 +88,8 @@
         {% endfor %}
       </select>
     </div>
-    <div class="field"><label>Price (₱)</label><input id="np-price" type="number" step="0.01" placeholder="0"/></div>
-    <div class="field"><label>Stock</label><input id="np-stock" type="number" placeholder="0"/></div>
+    <div class="field"><label>Price (₱)</label><input id="np-price" type="text" inputmode="decimal" placeholder="0.00" oninput="this.value=this.value.replace(/[^0-9.]/g,'').replace(/(\..*)\./g,'$1')"/><div class="field-hint">📌 Numbers only (e.g. 12 or 12.50)</div></div>
+    <div class="field"><label>Stock</label><input id="np-stock" type="text" inputmode="numeric" placeholder="0" oninput="this.value=this.value.replace(/[^0-9]/g,'')"/><div class="field-hint">📌 Whole numbers only</div></div>
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeModal('modal-add-product')">Kanselahin</button>
       <button class="btn-save" onclick="saveProduct()">I-save</button>
@@ -110,8 +110,8 @@
         {% endfor %}
       </select>
     </div>
-    <div class="field"><label>Price (₱)</label><input id="ep-price" type="number" step="0.01"/></div>
-    <div class="field"><label>Stock</label><input id="ep-stock" type="number"/></div>
+    <div class="field"><label>Price (₱)</label><input id="ep-price" type="text" inputmode="decimal" oninput="this.value=this.value.replace(/[^0-9.]/g,'').replace(/(\..*)\./g,'$1')"/><div class="field-hint">📌 Numbers only (e.g. 12 or 12.50)</div></div>
+    <div class="field"><label>Stock</label><input id="ep-stock" type="text" inputmode="numeric" oninput="this.value=this.value.replace(/[^0-9]/g,'')"/><div class="field-hint">📌 Whole numbers only</div></div>
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeModal('modal-edit-product')">Kanselahin</button>
       <button class="btn-save" onclick="updateProduct()">I-update</button>
@@ -166,14 +166,6 @@ async function deleteProduct(id, name) {
     await api('DELETE', `/api/products/${id}`);
     toast('Produkto nabura.'); setTimeout(() => location.reload(), 600);
   } catch(e) { toast('May error.'); }
-}
-
-function handleEdit(btn) {
-  openEdit(btn.dataset.id, btn.dataset.name, btn.dataset.category, btn.dataset.price, btn.dataset.stock);
-}
-
-function handleDelete(btn) {
-  deleteProduct(btn.dataset.id, btn.dataset.name);
 }
 </script>
 {% endblock %}

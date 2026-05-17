@@ -34,7 +34,7 @@
     <p style="font-size:0.78rem;color:#666;margin-bottom:4px;">{{ p.category }}</p>
     <p style="font-size:1rem;color:var(--orange);font-weight:700;margin-bottom:10px;">₱{{ p.price }}</p>
     <p style="font-size:0.75rem;color:#888;margin-bottom:10px;">Stock: {{ p.stock }}</p>
-    <button onclick="handleAddToCart(this)" data-product-id="{{ p.id }}" data-product-name="{{ p.name }}" data-product-price="{{ p.price }}"
+    <button onclick="addToCart({{ p.id }}, '{{ p.name|replace("'","\\'")|replace('"','\\"') }}', {{ p.price }})"
       style="width:100%;background:var(--cyan);color:#fff;border:none;border-radius:4px;padding:7px;font-family:'Open Sans',sans-serif;font-size:0.84rem;font-weight:700;cursor:pointer;">
       + Add to Cart
     </button>
@@ -78,7 +78,10 @@
 
     <div style="margin-bottom:10px;">
       <label style="font-size:0.72rem;font-weight:700;text-transform:uppercase;color:#555;display:block;margin-bottom:4px;">Your Name</label>
-      <input type="text" id="order-name" value="{{ username }}" style="width:100%;padding:8px 10px;border:1px solid #ccc;border-radius:4px;font-size:0.88rem;"/>
+      <input type="text" id="order-name" value="{{ username }}"
+        oninput="this.value=this.value.replace(/[^a-zA-Z\s]/g,'')"
+        style="width:100%;padding:8px 10px;border:1px solid #ccc;border-radius:4px;font-size:0.88rem;"/>
+      <div style="font-size:0.72rem;color:#888;margin-top:3px;">🚫 Letters and spaces only — no numbers or special characters</div>
     </div>
     <div style="margin-bottom:14px;">
       <label style="font-size:0.72rem;font-weight:700;text-transform:uppercase;color:#555;display:block;margin-bottom:4px;">Note / Special Request</label>
@@ -94,30 +97,30 @@
 
 {% block scripts %}
 <script>
-let cart = {};
+// Load cart from localStorage so it survives page reloads and filter changes
+let cart = JSON.parse(localStorage.getItem('edna_cart') || '{}');
 
-function handleAddToCart(btn) {
-  const id = btn.dataset.productId;
-  const name = btn.dataset.productName;
-  const price = parseFloat(btn.dataset.productPrice);
-  addToCart(id, name, price);
+function saveCart() {
+  localStorage.setItem('edna_cart', JSON.stringify(cart));
 }
 
 function addToCart(id, name, price) {
   if (cart[id]) { cart[id].qty += 1; }
   else { cart[id] = { id, name, price, qty: 1 }; }
+  saveCart();
   renderCart();
   if (!document.getElementById('cart-drawer').style.right.includes('0')) openCart();
   toast(`${name} added to cart!`);
 }
 
 function removeFromCart(id) {
-  delete cart[id]; renderCart();
+  delete cart[id]; saveCart(); renderCart();
 }
 
 function changeQty(id, delta) {
   if (!cart[id]) return;
   cart[id].qty = Math.max(1, cart[id].qty + delta);
+  saveCart();
   renderCart();
 }
 
@@ -148,6 +151,9 @@ function renderCart() {
   `).join('');
 }
 
+// Render cart on page load from saved localStorage
+renderCart();
+
 function openCart()  { document.getElementById('cart-drawer').style.right='0'; document.getElementById('cart-overlay').style.display='block'; }
 function closeCart() { document.getElementById('cart-drawer').style.right='-420px'; document.getElementById('cart-overlay').style.display='none'; }
 function toggleCart() {
@@ -167,6 +173,7 @@ async function placeOrder() {
       items: items.map(i => ({ id: i.id, qty: i.qty }))
     });
     cart = {};
+    saveCart();
     renderCart();
     closeCart();
     toast(`Order #${order.id} placed! Abangan ang notisya.`);

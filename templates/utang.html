@@ -39,7 +39,7 @@
       </td>
       <td>
         <a href="/utang/{{ c.id }}" class="btn-edit">View</a>
-        <button class="btn-delete" data-customer-id="{{ c.id }}" data-customer-name="{{ c.name }}" onclick="handleDeleteCustomer(this)">Delete</button>
+        <button class="btn-delete" onclick="deleteCustomer({{ c.id }}, '{{ c.name }}')">Delete</button>
       </td>
     </tr>
     {% else %}
@@ -67,7 +67,7 @@
 <div class="modal-overlay" id="modal-add-customer">
   <div class="modal">
     <div class="modal-title">Bagong Customer</div>
-    <div class="field"><label>Pangalan</label><input id="nc-name" type="text" placeholder="hal. Mang Rolly" autocomplete="off"/></div>
+    <div class="field"><label>Pangalan</label><input id="nc-name" type="text" placeholder="hal. Mang Rolly" autocomplete="off" oninput="this.value=this.value.replace(/[^a-zA-Z\s]/g,'')"/><div class="field-hint">🚫 Letters and spaces only — no numbers or special characters</div></div>
     <div class="field"><label>Contact (optional)</label><input id="nc-contact" type="text" placeholder="+63..."/></div>
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeModal('modal-add-customer')">Kanselahin</button>
@@ -99,10 +99,6 @@ async function deleteCustomer(id, name) {
     toast('Customer nabura.');
     setTimeout(() => location.reload(), 600);
   } catch(e) { toast('May error.'); }
-}
-
-function handleDeleteCustomer(btn) {
-  deleteCustomer(btn.dataset.customerId, btn.dataset.customerName);
 }
 </script>
 {% endblock %}
