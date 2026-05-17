@@ -10,8 +10,8 @@
   <meta name="apple-mobile-web-app-title" content="Edna"/>
   <meta name="theme-color" content="#111111"/>
   <link rel="manifest" href="/static/manifest.json"/>
-  <link rel="apple-touch-icon" href="/static/icons/icon-192x192.png"/>
-  <link rel="icon" type="image/png" sizes="96x96" href="/static/icons/icon-96x96.png"/>
+  <link rel="icon" type="image/png" href="/static/images/Edna%20Store.png"/>
+  <link rel="shortcut icon" type="image/png" href="/static/images/Edna%20Store.png"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"/>
   <style>
@@ -55,8 +55,8 @@
       <button class="tab" onclick="switchTab('customer')">🛒 Customer</button>
     </div>
 
-    {% if error %}<div class="error-msg"> {{ error }}</div>{% endif %}
-    {% if success %}<div class="success-msg"> {{ success }}</div>{% endif %}
+    {% if error %}<div class="error-msg">❌ {{ error }}</div>{% endif %}
+    {% if success %}<div class="success-msg">✅ {{ success }}</div>{% endif %}
 
     <!-- ADMIN LOGIN -->
     <div class="section visible" id="section-admin">
@@ -112,13 +112,13 @@
           <label>Full Name</label>
           <input type="text" id="reg-name" placeholder="hal. Mang Rolly" autocomplete="off"
             oninput="this.value=this.value.replace(/[^a-zA-Z\s]/g,'')"/>
-          <div class="pw-hint"> Letters and spaces only — no numbers or special characters</div>
+          <div class="pw-hint">🚫 Letters and spaces only — no numbers or special characters</div>
         </div>
         <div class="field">
           <label>Contact # (optional)</label>
           <input type="text" id="reg-contact" placeholder="09XXXXXXXXX" maxlength="11"
             oninput="this.value=this.value.replace(/[^0-9]/g,'')"/>
-          <div class="pw-hint"> Numbers only, maximum 11 digits (e.g. 09123456789)</div>
+          <div class="pw-hint">📌 Numbers only, maximum 11 digits (e.g. 09123456789)</div>
         </div>
         <div class="field">
           <label>Password</label>
@@ -161,7 +161,7 @@ function showLogin() {
 function showError(msg) {
   const el = document.getElementById('reg-error');
   const ok = document.getElementById('reg-success');
-  el.textContent = ' ' + msg;
+  el.textContent = '❌ ' + msg;
   el.style.display = 'block';
   if (ok) ok.style.display = 'none';
   el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -170,7 +170,7 @@ function showError(msg) {
 function showSuccess(msg) {
   const el = document.getElementById('reg-success');
   const err = document.getElementById('reg-error');
-  el.textContent = ' ' + msg;
+  el.textContent = '✅ ' + msg;
   el.style.display = 'block';
   if (err) err.style.display = 'none';
 }
