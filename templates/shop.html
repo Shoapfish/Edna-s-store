@@ -154,8 +154,19 @@ function renderCart() {
 // Render cart on page load from saved localStorage
 renderCart();
 
-function openCart()  { document.getElementById('cart-drawer').style.right='0'; document.getElementById('cart-overlay').style.display='block'; }
-function closeCart() { document.getElementById('cart-drawer').style.right='-420px'; document.getElementById('cart-overlay').style.display='none'; }
+function openCart() {
+  const drawer = document.getElementById('cart-drawer');
+  const isMobile = window.innerWidth <= 640;
+  drawer.style.width = isMobile ? '100%' : '400px';
+  drawer.style.right = '0';
+  document.getElementById('cart-overlay').style.display = 'block';
+}
+function closeCart() {
+  const drawer = document.getElementById('cart-drawer');
+  const isMobile = window.innerWidth <= 640;
+  drawer.style.right = isMobile ? '-100%' : '-420px';
+  document.getElementById('cart-overlay').style.display = 'none';
+}
 function toggleCart() {
   if (document.getElementById('cart-drawer').style.right === '0px') closeCart(); else openCart();
 }
