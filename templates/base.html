@@ -75,7 +75,7 @@
       <div style="font-size:0.72rem;color:#aaa;">Logged in as</div>
       <div style="font-size:0.85rem;color:#fff;font-weight:600;">
         {{ session.get('username','') }}
-        <span style="font-size:0.65rem;background:{% if is_admin %}var(--orange){% else %}var(--cyan){% endif %};color:#111;padding:1px 6px;border-radius:3px;margin-left:4px;">
+        <span class="user-badge {% if is_admin %}admin-badge{% else %}customer-badge{% endif %}">
           {% if is_admin %}ADMIN{% else %}CUSTOMER{% endif %}
         </span>
       </div>

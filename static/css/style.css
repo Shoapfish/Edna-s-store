@@ -123,6 +123,9 @@ body { background: #e8e8e8; color: var(--text-dark); display: flex; flex-directi
 
 .nav-link:hover { background: rgba(255,255,255,0.08); }
 .nav-link.active { background: var(--cyan); color: var(--white); font-weight: 600; }
+.user-badge { font-size: 0.65rem; color: #111; padding: 1px 6px; border-radius: 3px; margin-left: 4px; display: inline-block; }
+.admin-badge { background: var(--orange); }
+.customer-badge { background: var(--cyan); }
 
 /* ── MAIN ────────────────────────────────────────── */
 .main-content {

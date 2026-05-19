@@ -211,7 +211,16 @@
       "name": "kevin",
       "contact": "09602232830",
       "color": 3,
-      "utangs": []
+      "utangs": [
+        {
+          "id": 1,
+          "items": "libag sabon  kulangot anghit",
+          "amount": 145.0,
+          "date": "2026-05-19",
+          "due": "2026-05-24",
+          "paid": false
+        }
+      ]
     }
   ],
   "orders": [

@@ -5,6 +5,7 @@
 
 {% block content %}
 <a href="/utang" class="back-link">← Bumalik sa Utang List</a>
+<div id="page-data" data-cid="{{ customer.id }}" style="display:none;"></div>
 
 {% set total_owed = customer.utangs|selectattr('paid','equalto',false)|sum(attribute='amount') %}
 
@@ -47,9 +48,9 @@
       </td>
       <td>
         {% if not u.paid %}
-        <button class="btn-edit" onclick="markPaid({{ u.id }})">Bayad</button>
+        <button class="btn-edit" data-id="{{ u.id }}" onclick="markPaid(this.dataset.id)">Bayad</button>
         {% endif %}
-        <button class="btn-delete" onclick="deleteUtang({{ u.id }})">Burahin</button>
+        <button class="btn-delete" data-id="{{ u.id }}" onclick="deleteUtang(this.dataset.id)">Burahin</button>
       </td>
     </tr>
     {% else %}
@@ -77,7 +78,7 @@
 
 {% block scripts %}
 <script>
-const CID = {{ customer.id }};
+const CID = Number(document.getElementById('page-data').dataset.cid);
 document.getElementById('nu-date').value = todayStr();
 
 async function markPaid(uid) {
